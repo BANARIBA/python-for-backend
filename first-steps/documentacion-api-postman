@@ -1,0 +1,172 @@
+{
+  "info": {
+    "_postman_id": "2a359f30-4f87-4522-881c-295c2508cdaa",
+    "name": "FastAPI",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "10109923"
+  },
+  "item": [
+    {
+      "name": "Section Three",
+      "item": [
+        {
+          "name": "@app.post(\"/posts\") -> Create Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Quinto comentario\",\r\n    \"content\": \"Test quinto comentario\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8000/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "@app.get(\"/posts\") -> Get Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "@app.get(\"/posts/{post_id}\") -> Get Post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/posts/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "posts",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "True",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "@app.put(\"/posts/{post_id}\") -> Update Post",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Hola desde FastAPI Modificado\",\r\n    \"content\": \"el peluca sape\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8000/posts/11",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "posts",
+                "11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "@app.delete(\"/posts/{post_id}\") - > Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/posts/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "@app.get(\"/\") -> Home",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8000",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enlace documentacion automantica swagger",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/docs",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "docs"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
