@@ -1,11 +1,18 @@
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, field_validator, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Literal
+
+class Tag(BaseModel):
+  name: str = Field(..., min_length=2, max_length=30, description="Nombre de la etiqueta")
+  
+class Author(BaseModel):
+  name: str = Field(..., min_length=3, max_length=150, description="Nombre del autor quien creo el comentario")
+  email: EmailStr = Field(..., description="Email de quien creo el comentario")
 
 class PostBase(BaseModel):
   title: str
   content: Optional[str] = "Sin contenido"
-  tags: Optional[List[Tag]] = []
+  tags: Optional[List[Tag]] = Field(default_factory=list) # Crea una lista vacia por defecto [] 
   author: Optional[Author] = None
   
 class PostCreate(BaseModel):
@@ -22,7 +29,7 @@ class PostCreate(BaseModel):
     description="Contenido del post, minimo 10 caracteres",
     examples=["Contenido del primer post con fast api"],
   )
-  tags: List[Tag] = []
+  tags: List[Tag] = Field(default_factory=list) # Crea una lista vacia por defecto [] 
   author: Optional[Author] = None
   
   @field_validator("title")
@@ -33,7 +40,7 @@ class PostCreate(BaseModel):
     return value
 
 class PostUpdate(BaseModel):
-  title: str
+  title: Optional[str] = Field(None, min_length=3, max_length=100)
   content: Optional[str] = None
   
 class PostPublic(PostBase):
@@ -43,9 +50,14 @@ class PostSumary(BaseModel):
   id: int
   content: str
   
-class Tag(BaseModel):
-  name: str = Field(..., min_length=2, max_length=30, description="Nombre de la etiqueta")
-  
-class Author(BaseModel):
-  name: str = Field(..., min_length=3, max_length=150, description="Nombre del autor quien creo el comentario")
-  email: EmailStr = Field(..., description="Email de quien creo el comentario")
+class PaginationPost(BaseModel):
+  page: int
+  per_page: int
+  total: int
+  total_pages:int
+  search: Optional[str] = None
+  order_by: Literal["id", "title"]
+  direction: Literal["asc", "desc"]
+  items: List[PostPublic]
+  has_prev: bool
+  has_next: bool

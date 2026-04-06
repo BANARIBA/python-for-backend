@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "Section Three",
+      "name": "Section 3,4,5",
       "item": [
         {
           "name": "@app.post(\"/posts\") -> Create Post",
@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"title\": \"Quinto comentario\",\r\n    \"content\": \"Test quinto comentario\"\r\n}",
+              "raw": "{\r\n    \"title\": \"Quinto comentario\",\r\n    \"content\": \"Post con tags\",\r\n    \"tags\": [\r\n        { \"name\": \"Python\" },\r\n        { \"name\": \"FastAPI\" },\r\n        { \"name\": \"Backend\" }\r\n    ],\r\n    \"author\": {\r\n        \"name\": \"Ariel Anariba\",\r\n        \"email\": \"bsanchez@gmail.com\"\r\n    }\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -43,7 +43,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8000/posts",
+              "raw": "http://localhost:8000/posts?per_page=5&page=1&order_by=id&direction=desc",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -51,6 +51,29 @@
               "port": "8000",
               "path": [
                 "posts"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Cuarto",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": "5"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "order_by",
+                  "value": "id"
+                },
+                {
+                  "key": "direction",
+                  "value": "desc"
+                }
               ]
             }
           },
@@ -98,7 +121,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8000/posts/11",
+              "raw": "http://localhost:8000/posts/1",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -106,7 +129,7 @@
               "port": "8000",
               "path": [
                 "posts",
-                "11"
+                "1"
               ]
             }
           },
@@ -161,6 +184,37 @@
               "port": "8000",
               "path": [
                 "docs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "@app.get(\"/posts/by-tags\") -> Get Posts By Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/posts/by/tags?tags=python&tags=fastapi",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "posts",
+                "by",
+                "tags"
+              ],
+              "query": [
+                {
+                  "key": "tags",
+                  "value": "python"
+                },
+                {
+                  "key": "tags",
+                  "value": "fastapi"
+                }
               ]
             }
           },

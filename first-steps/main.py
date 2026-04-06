@@ -1,14 +1,9 @@
-from fastapi import FastAPI, Query, HTTPException
-from typing import List, Union
+from fastapi import FastAPI, Query, HTTPException, Path
+from math import ceil
+from typing import Union, Optional, Literal, List
 
-from classes.post import PostPublic, PostCreate, PostUpdate, PostSumary
-
-BLOG_POSTS = [
-  {"id": 1, "title": "Primer post", "content": "Contenido del 1 post"},
-  {"id": 2, "title": "Segundo post", "content": "Contenido del 2 post"},
-  {"id": 3, "title": "Tercer post", "content": "Contenido del 3 post"},
-  {"id": 4, "title": "Cuarto post", "content": "Contenido del 4 post"},
-]
+from classes.post import PostPublic, PostCreate, PostUpdate, PostSumary, PaginationPost
+from data.posts import BLOG_POSTS
 
 app: FastAPI = FastAPI(title="Mini blog")
 
@@ -19,19 +14,80 @@ def home():
 # http://localhost:8000/posts?query=????
 @app.get(
   "/posts",
-  response_model=List[PostPublic],
+  response_model=PaginationPost,
   response_description="Listado de comentarios"
 )
-def list_posts(query: str | None = Query(default=None, description="Texto para buscar por titulo del post")):
+def list_posts(
+  text: Optional[str] = Query(
+    default=None,
+    deprecated=True,
+    description="Texto para buscar por titulo del post, este parametro esta deprecado, usar search en su lugar",
+  ),
+  query: Optional[str] = Query(
+    default=None, 
+    description="Texto para buscar por titulo del post",
+    alias="search",# Con la url puedo usar query o search, es increible esto
+    min_length=3,
+    max_length=50,
+    pattern=r"^[\w\sáéíóúÁÉÍÓÚÜü-]+$"
+  ),
+  per_page: int = Query(
+    10,
+    ge=1, # mayor o igual
+    le=50,  # menor o igual
+    description="Numero de resultados entre [1-50]"
+  ),
+  page: int = Query(
+    1,
+    ge=1, # mayor o igual
+    description="Elementos a saltar antes de enviar la lista de comentarios"
+  ),
+  order_by: Literal["id", "title"] = Query(
+    "id", description="Campo de ordenamiento"
+  ),
+  direction: Literal["asc", "desc"] = Query(
+    "asc", description="Direccion de ordenamiento"
+  )
+):
+  results = BLOG_POSTS
   if query:
     # List comprenhension
-    results = [post for post in BLOG_POSTS if query.lower() in post["title"].lower()]
+    results = [post for post in results if query.lower() in post["title"].lower()]
     # For tradicional
     '''for post in BLOG_POSTS:
       if query.lower() in post["title"].lower():
         results.append(post)'''
-    raise HTTPException(status_code=200, detail=results)
-  raise HTTPException(status_code=200, detail=BLOG_POSTS)
+        
+  total = len(results)
+  total_pages = ceil(total / per_page) if total > 0 else 0
+  if total_pages == 0:
+    current_page = 1
+  else:
+    current_page= min(page, total_pages)
+    
+  results = sorted(results, key=lambda post: post[order_by], reverse=(direction == "desc"))
+  
+  if total_pages == 0:
+    items= []
+  else:
+    start = (current_page - 1) * per_page # page 1 => (1-1)*10, 2=>(2-1)*10 es el offset
+    items = results[start: start + per_page]
+  
+  has_prev = current_page > 0
+  has_next = current_page < total_pages if total_pages  > 0 else False
+  
+  raise HTTPException(status_code=200, detail={
+    "page": page,
+    "per_page": per_page,
+    "total": len(BLOG_POSTS),
+    "total_pages": total_pages,
+    "has_prev": has_prev,
+    "has_next": has_next,
+    "search": query,
+    "order_by": order_by,
+    "direction": direction,
+    "items": items
+  })
   
 # http://localhost:8000/posts/1
 @app.get(
@@ -39,7 +95,16 @@ def list_posts(query: str | None = Query(default=None, description="Texto para b
   response_model=Union[PostPublic, PostSumary],
   response_description="Comentario encontrado"
 )
-def get_post(post_id: int, query: bool | None = Query(default=True, description="Incluir el contenido del post True=Si, False=No")):
+def get_post(
+  post_id: int=Path(
+    ...,
+    ge=1,
+    title="Id del comentario",
+    description="Identificador entero del comentario, debe ser mayor o igual a 1",
+    examples=[1]
+  ),
+  query: bool | None = Query(default=True, description="Incluir el contenido del post True=Si, False=No")
+):
   for post in BLOG_POSTS:
     if post["id"] == post_id:
       if query and query == True:
@@ -52,6 +117,20 @@ def get_post(post_id: int, query: bool | None = Query(default=True, description=
   raise HTTPException(status_code=404, detail={
     "error": "post no encontrado"
   })
+  
+@app.get('/posts/by/tags', response_model=List[PostPublic])
+def get_posts_by_tags(
+  tags: List[str] = Query(
+    ...,
+    min_length=2,
+    description="Una o mas etiquetas para filtrar los comentarios, minimo 2 caracteres por etiqueta ejemplo: ?tags=python&tags=fastapi",
+  ),
+):
+  lower_tags: list[str] = [tag.lower() for tag in tags]
+  return [
+    post for post in BLOG_POSTS
+    if any(lower_tag["name"].lower() in lower_tags for lower_tag in post.get("tags", []))
+  ]
 
 @app.post(
   "/posts",
