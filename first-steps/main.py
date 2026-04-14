@@ -1,9 +1,59 @@
-from fastapi import FastAPI, Query, HTTPException, Path
+import os
 from math import ceil
 from typing import Union, Optional, Literal, List
 
+from fastapi import FastAPI, Query, HTTPException, Path
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import URL
+from sqlalchemy.orm import Session, sessionmaker, DeclarativeBase
+
 from classes.post import PostPublic, PostCreate, PostUpdate, PostSumary, PaginationPost
 from data.posts import BLOG_POSTS
+
+'''INICIO CONEXION A LA BASE DE DATOS'''
+POST_DB_PASSWORD: str = os.getenv('POST_DB_PASSWORD', '-$PilotoDePruebas$-')
+POST_DB_USER: str = os.getenv('POST_DB_USER', 'desarrollo')
+POST_DB_NAME: str = os.getenv('POST_DB_NAME', 'test_db')
+POST_DB_HOST: str = os.getenv('POST_DB_HOST', '10.30.3.204')
+POST_DB_PORT: str = os.getenv('POST_DB_PORT', '1433')
+
+connection_url = URL.create(
+    "mssql+pyodbc",
+    username=POST_DB_USER,
+    password=POST_DB_PASSWORD,
+    host=POST_DB_HOST,
+    port=POST_DB_PORT,
+    database=POST_DB_NAME,
+    query={
+        "driver": "ODBC Driver 18 for SQL Server",
+        "TrustServerCertificate": "yes",
+    },
+)
+
+engine = create_engine(
+  connection_url, 
+  echo=True, # hace que las query sql se vean en la terminal
+  future=True, # para usar ultimas caracteristicas
+)
+
+LOCAL_SESSION = sessionmaker(
+  bind=engine, # Motor a conectarse
+  autocommit=False, # Que los commit no se hagan automaticos,
+  autoflush=False,
+  class_=Session
+)
+
+class Base(DeclarativeBase):
+  pass
+
+try:
+    with engine.connect() as conn:
+      result = conn.execute(text("SELECT 1 AS ok"))
+      row = result.fetchone()
+      print("Conexión exitosa:", row.ok)
+except Exception as e:
+  print("Error de conexión:", e)
+'''FIN CONEXION A LA BASE DE DATOS'''
 
 app: FastAPI = FastAPI(title="Mini blog")
 
