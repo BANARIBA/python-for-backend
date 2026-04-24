@@ -1,6 +1,0 @@
-print("Hola, como te llamas?")
-name: str = input()
-print("Cuantos anios tienes?")
-age: int = int(input())
-print(f"Hola, {name}, encantado de conocerte!")
-print(f"Tu edad es: {age}")
