@@ -1,8 +1,9 @@
 # python-for-backend
 - IA and Servers with Fast API
 
+## Instalar fastapi primero con uvicorn
+- [uv](https://github.com/BANARIBA/python-for-backend.git)
 - [FAST API DOCS](https://fastapi.tiangolo.com/)
-- [Pydantic](https://docs.pydantic.dev/latest/)
 
 # Crear entorno virtual y ejecutar server
 1. __Crea entorno virtual__ ```py -m venv venv```
@@ -11,3 +12,7 @@
 3. __Dentro del venv instalar FastApi__ ```pip install "fastapi[standard]"```
 4. __Crear main.py__
 4. __Ejecutar Desarrollo__ ```fastapi dev main.py``` __o__ ```uvicorn main:app --reload```
+
+
+Ver video: Funciones
+
