@@ -14,5 +14,5 @@
 4. __Ejecutar Desarrollo__ ```fastapi dev main.py``` __o__ ```uvicorn main:app --reload```
 
 
-Ver video: Funciones
+Ver video: POO parte 2
 
