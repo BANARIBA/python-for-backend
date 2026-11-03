@@ -20,4 +20,4 @@
 - [Pydantic - Validacion de Datos Dtos](https://pydantic.dev/docs/validation/dev/get-started/install/)
 - __uv add pydantic__
 
-VIDEO: Seccion 5: Validaciones query parameters
+VIDEO: Seccion 5: Solucion al ejercicio practico parte 2

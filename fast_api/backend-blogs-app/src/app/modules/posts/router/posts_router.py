@@ -1,6 +1,7 @@
-from typing import List, Union
+from math import ceil
+from typing import List, Union, Literal
 from fastapi import APIRouter, Query, Body, HTTPException, status, Path
-from src.app.modules.posts.schemas import PostCreate, PostUpdate, PostPublic, PostSummary
+from src.app.modules.posts.schemas import PostCreate, PostUpdate, PostPublic, PostSummary, PaginationPost
 
 BLOG_POSTS = [
     {
@@ -27,6 +28,16 @@ BLOG_POSTS = [
         "id": 5,
         "title": "Comentario Cinco",
         "content": "Comentario Cinco",
+    },
+    {
+        "id": 6,
+        "title": "Comentario Seis",
+        "content": "Comentario Seis",
+    },
+    {
+        "id": 7,
+        "title": "Comentario Siete",
+        "content": "Comentario Siete",
     },
 ]
 
@@ -62,24 +73,58 @@ def get_post(
     )
     
 
-# http://127.0.0.1:8000/api/posts?query=Comentario Uno
-@post_router.get("/", response_model=List[PostPublic])
+# http://127.0.0.1:8000/api/posts?search=Comentario Uno&limit=2&offset=60&order_by=id&direction=asc
+@post_router.get("/", response_model=PaginationPost)
 def get_all_posts(
-    query: str | None = Query(
+    search: str | None = Query(
         title="title", 
         default=None, 
-        description="Texto para buscar por titulo del comentario"
+        description="Texto para buscar por titulo del comentario",
+        alias="search",
+        min_length=3,
+        max_length=50,
+        # pattern=r"^[a-zA-Z]+$",
     ),
+    per_page: int = Query(default=10, ge=1, le=50, description="Numero de resultados por pagina [1 a 50]"),
+    page: int = Query(default=1, ge=1, description="Elementos a saltar antes de empezar a paginar"),
+    order_by: Literal["id", "title"] = Query(default="id", description="Campo de Ordernamiento por default id"),
+    direction: Literal["asc", "desc"] = Query(default="desc", description="Tipo de ordenamiento, ascendente o descendente"),
 ):
-    if query:
-        results = [post for post in BLOG_POSTS if query.lower() == post["title"].lower()]
-        # for post in BLOG_POSTS:
-        #     if query.lower() in post["title"].lower():
-        #         results.append(post)
+    results = BLOG_POSTS
+    if search:
+        results = [post for post in results if search.lower() == post["title"].lower()]
 
-        return results
+    total = len(results)
+    total_pages = ceil(total/per_page) if total > 0 else 0
 
-    return BLOG_POSTS
+    if total_pages == 0:
+        current_page = 1
+    else:
+        current_page = min(page, total_pages)
+
+    results = sorted(results, key=lambda post: post[order_by], reverse=(direction=="desc"))
+
+    if total_pages == 0:
+        items = []
+    else:
+        start = (current_page - 1) * per_page
+        items = results[start: start + per_page]
+
+    has_prev = current_page > 1
+    has_next = current_page < total_pages if total_pages > 0 else False
+
+    return PaginationPost(
+        page=current_page,
+        per_page=per_page,
+        total_pages=total_pages,
+        total=total,
+        has_prev=has_prev,
+        has_next=has_next,
+        order_by=order_by,
+        direction=direction,
+        search=search,
+        items=items,
+    )
 
 # http://127.0.0.1:8000/api/post
 '''
