@@ -8,36 +8,71 @@ BLOG_POSTS = [
         "id": 1,
         "title": "Comentario Uno",
         "content": "Comentario Uno",
+        "tags": [
+            {
+                "name": "tag_one"
+            }
+        ]
     },
     {
         "id": 2,
         "title": "Comentario Dos",
         "content": "Comentario Dos",
+        "tags": [
+            {
+                "name": "tag_one"
+            }
+        ]
     },
     {
         "id": 3,
         "title": "Comentario Tres",
         "content": "Comentario Tres",
+        "tags": [
+            {
+                "name": "tag_one"
+            }
+        ]
     },
     {
         "id": 4,
         "title": "Comentario Cuatro",
         "content": "Comentario Cuatro",
+        "tags": [
+            {
+                "name": "tag_one"
+            }
+        ]
     },
     {
         "id": 5,
         "title": "Comentario Cinco",
         "content": "Comentario Cinco",
+        "tags": [
+            {
+                "name": "tag_two"
+            }
+        ]
     },
     {
         "id": 6,
         "title": "Comentario Seis",
         "content": "Comentario Seis",
+        "tags": [
+            {
+                "name": "tag_two"
+            }
+        ]
     },
     {
         "id": 7,
         "title": "Comentario Siete",
         "content": "Comentario Siete",
+        "tags": [
+            {
+                "name": "tag_three"
+            }
+        ]
     },
 ]
 
@@ -76,6 +111,14 @@ def get_post(
 # http://127.0.0.1:8000/api/posts?search=Comentario Uno&limit=2&offset=60&order_by=id&direction=asc
 @post_router.get("/", response_model=PaginationPost)
 def get_all_posts(
+    text: str | None = Query(
+        title="title", 
+        deprecated=True,
+        default=None, 
+        description="Parametro obsoleto, usa query en su lugar",
+        min_length=3,
+        max_length=50,
+    ),
     search: str | None = Query(
         title="title", 
         default=None, 
@@ -90,6 +133,7 @@ def get_all_posts(
     order_by: Literal["id", "title"] = Query(default="id", description="Campo de Ordernamiento por default id"),
     direction: Literal["asc", "desc"] = Query(default="desc", description="Tipo de ordenamiento, ascendente o descendente"),
 ):
+    search = search or text
     results = BLOG_POSTS
     if search:
         results = [post for post in results if search.lower() == post["title"].lower()]
@@ -125,6 +169,21 @@ def get_all_posts(
         search=search,
         items=items,
     )
+
+@post_router.get("/by/tags", response_model=List[PostPublic])
+def find_posts_by_tags(
+    tags: List[str] = Query(
+        ..., 
+        min_length=1, 
+        description="Escribe 1 o mas etiquetas para buscar comentarios ej: ?tags=python&tags=node"
+    )
+):
+    tags_lower = [tag.lower() for tag in tags]
+    return [
+        post for post in BLOG_POSTS if any(
+            tag["name"].lower() in tags_lower for tag in post.get("tags", [])
+        )
+    ]
 
 # http://127.0.0.1:8000/api/post
 '''
